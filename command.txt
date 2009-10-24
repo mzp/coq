@@ -1,0 +1,97 @@
+* よく使うマンド
+
+** Proof
+「これから証明をするぞ！」という意気込みを表現する。実は省略が可能。
+>|ocaml|
+AssociativityOfAppend < Proof.
+||<
+** Print
+値の定義を出力する
+>|ocaml|
+Coq < Print nil.
+Inductive list (A : Type) : Type :=
+    nil : list A | cons : A -> list A -> list A
+
+For nil: Argument A is implicit and maximally inserted
+For cons: Argument A is implicit
+For list: Argument scope is [type_scope]
+For nil: Argument scope is [type_scope]
+For cons: Argument scopes are [type_scope _ _]
+||<
+
+** Check
+式の型を出力する。定理の内容も見れる。
+
+>|ocaml|
+Coq < Check 0.
+0
+     : nat
+||<
+
+** Eval
+式を評価する
+>|ocaml|
+Coq < Eval compute in 1+2.
+     = 3
+     : nat
+||<
+
+** Locate
+修飾子付きの名前を返す。演算子から関数の名前を調べるときにも使う。
+
+>|ocaml|
+Coq < Locate nil.
+Constructor Coq.Lists.List.nil
+
+Coq < Locate "=".
+Notation            Scope
+"x = y :> A" := eq x y         : type_scope
+                      (default interpretation)
+"x = y" := eq x y    : type_scope
+                      (default interpretation)
+||<
+
+** SearchPattern
+パターンを指定してタクティックを検索する。
+>|ocaml|
+Coq < SearchPattern (_ < S _).
+Lt.le_lt_n_Sm: forall n m : nat, n <= m -> n < S m
+Lt.lt_n_Sn: forall n : nat, n < S n
+Lt.lt_S: forall n m : nat, n < m -> n < S m
+Lt.lt_n_S: forall n m : nat, n < m -> S n < S m
+Lt.lt_O_Sn: forall n : nat, 0 < S n
+||<
+
+** Show
+証明モードのときに使える命令で、証明の仮定とゴールを表示する。
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  ============================
+   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
+||<
+
+** Undo
+証明モードのときに使える命令で、直前の動作を取り消します。
+
+>|ocaml|
+AssociativityOfAppend < intros.
+1 subgoal
+
+  A : Type
+  x : list A
+  y : list A
+  z : list A
+  ============================
+   (x +++ y) +++ z = x +++ (y +++ z)
+
+AssociativityOfAppend < Undo.
+1 subgoal
+
+  ============================
+   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
+||<
+** Restart
+証明モードのときに使える命令で、証明を最初からやりなおす。

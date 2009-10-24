@@ -1,0 +1,155 @@
+* よく使うtactics
+** intro
+ゴール(証明したいこと)から仮定を1つ取り出す
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  ============================
+   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
+
+AssociativityOfAppend < intro H.
+1 subgoal
+
+  H : Type
+  ============================
+   forall x y z : list H, (x +++ y) +++ z = x +++ (y +++ z)
+||<
+
+** intros
+intro を繰り返し実行してすべての仮定を取り出す
+仮定を取り出しすぎると、帰納法が使えなくなってしまう。
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  ============================
+   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
+
+AssociativityOfAppend < intros.
+1 subgoal
+
+  A : Type
+  x : list A
+  y : list A
+  z : list A
+  ============================
+   (x +++ y) +++ z = x +++ (y +++ z)
+||<
+
+** simpl
+式をβ簡約する(評価する)。 "simple" ではないので注意。
+
+- simpl in Hで仮定Hの簡約ができる
+
+>|ocaml|
+(* +++ はappend *)
+AssociativityOfAppend < Show x.
+2 subgoals
+
+  A : Type
+  y : list A
+  z : list A
+  ============================
+   (nil +++ y) +++ z = nil +++ (y +++ z)
+
+AssociativityOfAppend < simpl.
+2 subgoals
+
+  A : Type
+  y : list A
+  z : list A
+  ============================
+   y +++ z = y +++ z
+||<
+
+** induction
+帰納法による証明を行う。ゴールが基底と帰納の2つに増える。
+>|ocaml|
+AssociativityOfAppend < induction x.
+2 subgoals
+
+  A : Type
+  y : list A
+  z : list A
+  ============================
+   (nil +++ y) +++ z = nil +++ (y +++ z)
+
+subgoal 2 is:
+ ((a :: x) +++ y) +++ z = (a :: x) +++ (y +++ z)
+||<
+
+** apply
+仮定や定理を使って式全体の書き換えを行う。
+
+>|ocaml|
+
+Coq < Show.
+1 subgoal
+
+  ============================
+   0 <= 0
+
+t < Check Le.le_refl.
+le_refl
+     : forall n : nat, n <= n
+
+t < apply Le.le_refl.
+Proof completed.
+||<
+
+** rewrite
+仮定や定理を使って式の一部分の書き換えを行う。
+
+- rewrite H with (x := 1) (y := 2)のように変数の対応を指定することもできる
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  A : Type
+  a : A
+  x : list A
+  y : list A
+  z : list A
+  IHx : (x +++ y) +++ z = x +++ (y +++ z)
+  ============================
+   a :: (x +++ y) +++ z = a :: x +++ (y +++ z)
+
+AssociativityOfAppend < rewrite IHx.
+1 subgoal
+
+  A : Type
+  a : A
+  x : list A
+  y : list A
+  z : list A
+  IHx : (x +++ y) +++ z = x +++ (y +++ z)
+  ============================
+   a :: x +++ (y +++ z) = a :: x +++ (y +++ z)
+||<
+
+** reflexibity
+式の左辺と右辺が完全に同じときに式を閉じるときに使う。
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  A : Type
+  a : A
+  x : list A
+  y : list A
+  z : list A
+  IHx : (x +++ y) +++ z = x +++ (y +++ z)
+  ============================
+   a :: x +++ (y +++ z) = a :: x +++ (y +++ z)
+
+AssociativityOfAppend < reflexivity.
+Proof completed.
+||<
+
+** destruct
+** case
