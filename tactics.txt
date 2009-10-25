@@ -219,3 +219,16 @@ t2 < case x.
 subgoal 2 is:
  false = true \/ false = false
 ||<
+
+** decide equality
+Inductionで定義した型のequalityを証明する。
+>||
+Coq < Show.
+1 subgoal
+
+  ============================
+   forall a b : nat, {a = b} + {a <> b}
+
+t < decide equality.
+Proof completed.
+||<
