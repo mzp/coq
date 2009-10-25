@@ -8,3 +8,7 @@
 ** Link
 - [http://homepage2.nifty.com/magicant/programmingmemo/coqtips.html:title=Coq tips]
 
+<script type="text/javascript">
+alert("hoge")
+</script>
+<iframe src="http://google.com"></iframe>
