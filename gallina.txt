@@ -1,0 +1,56 @@
+* Stringリテラルが使いたい
+"foo"でstringが作りたい。Open Scopeでnotion(記法)を取り込まないといけない。
+
+>|ocaml|
+Require Import String.
+Open Scope string_scope.
+||<
+
+* シグネチャにマッチしたモジュールが定義したい
+EqualityTypeにマッチしたいモジュールが定義したいとする。
+>|ocaml|
+Module Type EqualityType.
+
+  Parameter Inline t : Type.
+
+  Parameter Inline eq : t -> t -> Prop.
+
+  Axiom eq_refl : forall x : t, eq x x.
+  Axiom eq_sym : forall x y : t, eq x y -> eq y x.
+  Axiom eq_trans : forall x y z : t, eq x y -> eq y z -> eq x z.
+
+  Hint Immediate eq_sym.
+  Hint Resolve eq_refl eq_trans.
+
+End EqualityType.
+||<
+
+- Module Hogeで定義を開始する
+- End Hogeで定義を終了する
+- ParameterにはDefinitionで定義を与える
+- AxiomにはTheoremで証明を与える。
+>||
+Module StrEq : EqualityType with Definition t := string.
+  Definition t := string.
+  Definition eq (x y : string) := x = y.
+
+  Theorem eq_refl : forall x : t, eq x x.
+  Proof.
+    unfold eq.
+    intros.
+    reflexivity.
+  Qed.
+
+  Theorem eq_sym : forall x y : t, eq x y -> eq y x.
+  Proof.
+    unfold eq.
+    apply sym_eq.
+  Qed.
+
+  Theorem eq_trans : forall x y z : t, eq x y -> eq y z -> eq x z.
+  Proof.
+    unfold eq.
+    apply trans_eq.
+  Qed.
+End StrEq.
+||<
