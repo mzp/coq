@@ -1,107 +1,9 @@
-* よく使うtactics
-** intro
-ゴール(証明したいこと)から仮定を1つ取り出す
+* 仮定が...
+**  f x
+simpl in Hで仮定Hの簡約ができる
 
->|ocaml|
-AssociativityOfAppend < Show.
-1 subgoal
-
-  ============================
-   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
-
-AssociativityOfAppend < intro H.
-1 subgoal
-
-  H : Type
-  ============================
-   forall x y z : list H, (x +++ y) +++ z = x +++ (y +++ z)
-||<
-
-** intros
-intro を繰り返し実行してすべての仮定を取り出す
-仮定を取り出しすぎると、帰納法が使えなくなってしまう。
-
->|ocaml|
-AssociativityOfAppend < Show.
-1 subgoal
-
-  ============================
-   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
-
-AssociativityOfAppend < intros.
-1 subgoal
-
-  A : Type
-  x : list A
-  y : list A
-  z : list A
-  ============================
-   (x +++ y) +++ z = x +++ (y +++ z)
-||<
-
-** simpl
-式をβ簡約する(評価する)。 "simple" ではないので注意。
-
-- simpl in Hで仮定Hの簡約ができる
-
->|ocaml|
-(* +++ はappend *)
-AssociativityOfAppend < Show x.
-2 subgoals
-
-  A : Type
-  y : list A
-  z : list A
-  ============================
-   (nil +++ y) +++ z = nil +++ (y +++ z)
-
-AssociativityOfAppend < simpl.
-2 subgoals
-
-  A : Type
-  y : list A
-  z : list A
-  ============================
-   y +++ z = y +++ z
-||<
-
-** induction
-帰納法による証明を行う。ゴールが基底と帰納の2つに増える。
->|ocaml|
-AssociativityOfAppend < induction x.
-2 subgoals
-
-  A : Type
-  y : list A
-  z : list A
-  ============================
-   (nil +++ y) +++ z = nil +++ (y +++ z)
-
-subgoal 2 is:
- ((a :: x) +++ y) +++ z = (a :: x) +++ (y +++ z)
-||<
-
-** apply
-仮定や定理を使って式全体の書き換えを行う。
-
->|ocaml|
-
-Coq < Show.
-1 subgoal
-
-  ============================
-   0 <= 0
-
-t < Check Le.le_refl.
-le_refl
-     : forall n : nat, n <= n
-
-t < apply Le.le_refl.
-Proof completed.
-||<
-
-** rewrite
-仮定や定理を使って式の一部分の書き換えを行う。
+** x = y
+rewriteで、式の一部分を書き換える。
 
 - rewrite H with (x := 1) (y := 2)のように変数の対応を指定することもできる
 
@@ -131,28 +33,8 @@ AssociativityOfAppend < rewrite IHx.
    a :: x +++ (y +++ z) = a :: x +++ (y +++ z)
 ||<
 
-** reflexibity
-式の左辺と右辺が完全に同じときに式を閉じるときに使う。
-
->|ocaml|
-AssociativityOfAppend < Show.
-1 subgoal
-
-  A : Type
-  a : A
-  x : list A
-  y : list A
-  z : list A
-  IHx : (x +++ y) +++ z = x +++ (y +++ z)
-  ============================
-   a :: x +++ (y +++ z) = a :: x +++ (y +++ z)
-
-AssociativityOfAppend < reflexivity.
-Proof completed.
-||<
-
-** inversion
-(Co)Inductiveで定義したバリアントから、仮定を取り出す。
+** P x = P yの場合(PはInductiveに定義されたコンストラクタ)
+inversionで(Co)Inductiveで定義したバリアントから、仮定を取り出す。
 
 >||
 t < Show.
@@ -177,8 +59,189 @@ t < inversion H.
    y = y
 ||<
 
-** destruct
-inductionに似ているが、仮定は導入しない。場合分けに用いる。
+** P xの場合(PはInductiveに定義された命題)
+inversion Hで、命題の前提を取り出す。
+
+>|ocaml|
+Coq < Inductive zero : nat -> Prop := Zero : zero O.
+
+Coq < Theorem t : forall n : nat, zero n -> n = 0.
+1 subgoal
+
+  ============================
+   forall n : nat, zero n -> n = 0
+
+t < intros.
+1 subgoal
+
+  n : nat
+  H : zero n
+  ============================
+   n = 0
+
+t < inversion H.
+1 subgoal
+
+  n : nat
+  H : zero n
+  H0 : 0 = n
+  ============================
+   0 = 0
+||<
+
+** A -> Bの場合
+applyで、仮定や定理を使って式全体の書き換えを行う。
+
+>|ocaml|
+
+Coq < Show.
+1 subgoal
+
+  ============================
+   0 <= 0
+
+t < Check Le.le_refl.
+le_refl
+     : forall n : nat, n <= n
+
+t < apply Le.le_refl.
+Proof completed.
+||<
+
+** (x=x -> A)の場合
+assert AでAを仮定し、apply Hでそれを証明する。
+
+>|ocaml|
+s < assert A.
+2 subgoals
+
+  x : nat
+  A : Prop
+  H : x = x -> A
+  ============================
+   A
+
+subgoal 2 is:
+ A
+
+s < apply H.
+2 subgoals
+
+  x : nat
+  A : Prop
+  H : x = x -> A
+  ============================
+   x = x
+
+subgoal 2 is:
+ A
+||<
+
+* ゴールが...
+** 全量子(forall)の場合
+introで仮定を取り出す。
+
+** A -> Bの場合
+introでゴール(証明したいこと)から仮定を1つ取り出す。
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  ============================
+   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
+
+AssociativityOfAppend < intro H.
+1 subgoal
+
+  H : Type
+  ============================
+   forall x y z : list H, (x +++ y) +++ z = x +++ (y +++ z)
+||<
+
+introsなら、すべての仮定を取り出せる。
+仮定を取り出しすぎると、帰納法が使えなくなることもある。
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  ============================
+   forall (A : Type) (x y z : list A), (x +++ y) +++ z = x +++ (y +++ z)
+
+AssociativityOfAppend < intros.
+1 subgoal
+
+  A : Type
+  x : list A
+  y : list A
+  z : list A
+  ============================
+   (x +++ y) +++ z = x +++ (y +++ z)
+||<
+
+** 関数適用を含む場合
+simplで式をβ簡約する(評価する)。 "simple" ではないので注意。
+
+>|ocaml|
+(* +++ はappend *)
+AssociativityOfAppend < Show x.
+2 subgoals
+
+  A : Type
+  y : list A
+  z : list A
+  ============================
+   (nil +++ y) +++ z = nil +++ (y +++ z)
+
+AssociativityOfAppend < simpl.
+2 subgoals
+
+  A : Type
+  y : list A
+  z : list A
+  ============================
+   y +++ z = y +++ z
+||<
+
+** tに関する命題の場合
+inductionで帰納法による証明を行う。ゴールが基底と帰納の2つに増える。
+>|ocaml|
+AssociativityOfAppend < induction x.
+2 subgoals
+
+  A : Type
+  y : list A
+  z : list A
+  ============================
+   (nil +++ y) +++ z = nil +++ (y +++ z)
+
+subgoal 2 is:
+ ((a :: x) +++ y) +++ z = (a :: x) +++ (y +++ z)
+||<
+
+** x = xの場合
+reflexibityで、証明を完了する。
+
+>|ocaml|
+AssociativityOfAppend < Show.
+1 subgoal
+
+  A : Type
+  a : A
+  x : list A
+  y : list A
+  z : list A
+  IHx : (x +++ y) +++ z = x +++ (y +++ z)
+  ============================
+   a :: x +++ (y +++ z) = a :: x +++ (y +++ z)
+
+AssociativityOfAppend < reflexivity.
+Proof completed.
+||<
+
+** match x with ...の場合
+destructで場合分けを行なう。
 - ペアとかはdestructすれば簡単な形になることが多い
 
 >|ocaml|
@@ -198,31 +261,10 @@ subgoal 2 is:
  false = true \/ false = false
 ||<
 
-** case
-場合分け。
+** forall a b : nat, {a = b} + {a <> b}の場合
+decide equalityで証明する。
 
->||
-t2 < Show.
-1 subgoal
-
-  x : bool
-  ============================
-   x = true \/ x = false
-
-t2 < case x.
-2 subgoals
-
-  x : bool
-  ============================
-   true = true \/ true = false
-
-subgoal 2 is:
- false = true \/ false = false
-||<
-
-** decide equality
-Inductionで定義した型のequalityを証明する。
->||
+>|ocaml|
 Coq < Show.
 1 subgoal
 
